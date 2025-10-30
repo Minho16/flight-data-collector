@@ -1,35 +1,64 @@
-from app.scheduler import run_collector
-from app.database import Base, engine
+import logging
+
 from apscheduler.schedulers.background import BackgroundScheduler
-from datetime import datetime
+
+from app.core.email_notifier import EmailNotificationManager
+from app.core.logging import setup_logging
+from app.core.task_manager import TaskManager
+from app.services.flight_data_service import FlightDataService
+from app.core.database import Base, engine
+
 import time
+
 
 def init_db():
     """Create tables if they do not exist."""
     Base.metadata.create_all(bind=engine)
-    print("Database initialized.")
+    logging.info("Database initialized.")
 
-def job():
-    """Job to run the collector."""
-    print(f"[{datetime.utcnow()} UTC] Running flight data collector...")
-    run_collector()
-    print(f"[{datetime.utcnow()} UTC] Collector finished.")
+
+def run_scheduled_etl():
+    flight_data_service = FlightDataService()
+    email_manager = EmailNotificationManager()
+
+    task_manager = TaskManager(
+        flight_data_service=flight_data_service,
+        email_manager=email_manager,
+    )
+
+    task_manager.run_daily_flight_etl()
+
+def try_to_send_email():
+    email_manager = EmailNotificationManager()
+    try:
+        email_manager.send_email(subject="this is a test email", body="this is a test email")
+        logging.info("Email sent.")
+
+    except Exception as e:
+        logging.error(e)
+
 
 if __name__ == "__main__":
+    setup_logging()
+
     # Initialize the database
     init_db()
 
-    # Start the scheduler
     scheduler = BackgroundScheduler(timezone="UTC")
-    # Schedule daily at 23:00 UTC
-    scheduler.add_job(job, trigger='cron', hour=23, minute=0)
+    scheduler.add_job(run_scheduled_etl, trigger="cron", hour=22, minute=0)
     scheduler.start()
-    print("Scheduler started. Waiting for daily job at 23:00 UTC...")
+    logging.info("Scheduler started. Waiting for daily ETL job at 22:00 UTC...")
 
     try:
-        # Keep the script running so scheduler can trigger
         while True:
             time.sleep(60)
     except (KeyboardInterrupt, SystemExit):
         scheduler.shutdown()
-        print("Scheduler stopped.")
+        logging.info("Scheduler stopped.")
+
+
+# if __name__ == "__main__":
+#     setup_logging()
+#     init_db()
+#     try_to_send_email()
+#     run_scheduled_etl()

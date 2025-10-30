@@ -1,11 +1,12 @@
 from sqlalchemy import Column, Integer, String, DateTime, Date
-from app.database import Base
+from app.core.database import Base
 
-class FlightRaw(Base):
+
+class FlightRawData(Base):
     __tablename__ = "raw_flight_data"
     __table_args__ = {"schema": "flight_schema"}
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
 
     flight_date = Column(Date)
     flight_status = Column(String)
