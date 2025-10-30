@@ -28,14 +28,6 @@ def run_scheduled_etl():
 
     task_manager.run_daily_flight_etl()
 
-def try_to_send_email():
-    email_manager = EmailNotificationManager()
-    try:
-        email_manager.send_email(subject="this is a test email", body="this is a test email")
-
-    except Exception as e:
-        logging.error(e)
-
 
 if __name__ == "__main__":
     setup_logging()
@@ -44,9 +36,9 @@ if __name__ == "__main__":
     init_db()
 
     scheduler = BackgroundScheduler(timezone="UTC")
-    scheduler.add_job(run_scheduled_etl, trigger="cron", hour=17, minute=0)
+    scheduler.add_job(run_scheduled_etl, trigger="cron", hour=15, minute=0)
     scheduler.start()
-    logging.info("Scheduler started. Waiting for daily ETL job at 17:00 UTC...")
+    logging.info("Scheduler started. Waiting for daily ETL job at 15:00 UTC...")
 
     try:
         while True:
@@ -59,5 +51,4 @@ if __name__ == "__main__":
 # if __name__ == "__main__":
 #     setup_logging()
 #     init_db()
-#     try_to_send_email()
 #     run_scheduled_etl()
