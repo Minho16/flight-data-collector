@@ -48,9 +48,9 @@ if __name__ == "__main__":
     init_db()
 
     scheduler = BackgroundScheduler(timezone="UTC")
-    scheduler.add_job(run_scheduled_etl, trigger="cron", hour=14, minute=45)
+    scheduler.add_job(run_scheduled_etl, trigger="cron", hour=22, minute=45)
     scheduler.start()
-    logging.info("Scheduler started. Waiting for daily ETL job at 14:45 UTC...")
+    logging.info("Scheduler started. Waiting for daily ETL job at 22:45 UTC...")
 
     try:
         while True:
@@ -58,8 +58,8 @@ if __name__ == "__main__":
     except (KeyboardInterrupt, SystemExit):
         scheduler.shutdown()
         logging.info("Scheduler stopped.")
-
-
+#
+#
 # if __name__ == "__main__":
 #     setup_logging()
 #     init_db()

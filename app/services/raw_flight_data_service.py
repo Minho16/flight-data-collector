@@ -4,7 +4,7 @@ import math
 from app.api_client.client_api import AviationStackFlightDataCollector
 from app.repository.raw_flight_repository import RawFlightRepository
 
-DEPARTURE_AIRPORT_CODE = "ICN"
+DEPARTURE_AIRPORT_CODE = "PMI"
 
 
 class RawFlightDataService:
