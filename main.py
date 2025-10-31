@@ -36,9 +36,9 @@ if __name__ == "__main__":
     init_db()
 
     scheduler = BackgroundScheduler(timezone="UTC")
-    scheduler.add_job(run_scheduled_etl, trigger="cron", hour=15, minute=0)
+    scheduler.add_job(run_scheduled_etl, trigger="cron", hour=14, minute=45)
     scheduler.start()
-    logging.info("Scheduler started. Waiting for daily ETL job at 15:00 UTC...")
+    logging.info("Scheduler started. Waiting for daily ETL job at 14:45 UTC...")
 
     try:
         while True:
