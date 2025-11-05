@@ -47,9 +47,9 @@ jobs:
             # Pull latest changes
             git pull origin main
 
-            # Stop and remove any running containers using this image
-            docker ps -q --filter "ancestor=flight-data-collector" | xargs -r docker stop
-            docker ps -aq --filter "ancestor=flight-data-collector" | xargs -r docker rm
+            # Stop & remove ALL containers
+            docker stop $(docker ps -q) || true
+            docker rm $(docker ps -aq) || true
             
             # Optional: remove old dangling images
             docker image prune -f
