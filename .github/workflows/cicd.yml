@@ -55,7 +55,7 @@ jobs:
             docker image prune -f
             
             # Rebuild
-            docker build -t flight-data-collector .
+            docker build --no-cache -t flight-data-collector .
             
             # Run the new container
             docker run -d --name flight-data-collector \
