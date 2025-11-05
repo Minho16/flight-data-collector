@@ -47,12 +47,17 @@ jobs:
             # Pull latest changes
             git pull origin main
 
-            # Rebuild container
+            # Stop and remove any running containers using this image
+            docker ps -q --filter "ancestor=flight-data-collector" | xargs -r docker stop
+            docker ps -aq --filter "ancestor=flight-data-collector" | xargs -r docker rm
+            
+            # Optional: remove old dangling images
+            docker image prune -f
+            
+            # Rebuild
             docker build -t flight-data-collector .
-
-            docker stop flight-data-collector || true
-            docker rm flight-data-collector || true
-
+            
+            # Run the new container
             docker run -d --name flight-data-collector \
               -e DB_USER="${{ secrets.DB_USER }}" \
               -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
