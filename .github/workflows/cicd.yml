@@ -1,0 +1,51 @@
+name: Deploy Flight Collector to VM
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Deploy to VM via SSH
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} << 'EOF'
+            cd /home/minho1693/flight-data-collector
+
+            git pull origin main
+
+            docker build -t flight-data-collector .
+
+            docker stop flight-data-collector || true
+            docker rm flight-data-collector || true
+
+            docker run -d --name flight-data-collector \
+              -e DB_USER="${{ secrets.DB_USER }}" \
+              -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+              -e DB_HOST="${{ secrets.DB_HOST }}" \
+              -e DB_PORT="${{ secrets.DB_PORT }}" \
+              -e DB_NAME="${{ secrets.DB_NAME }}" \
+
+              -e AVIATION_STACK_API_URL="${{ secrets.AVIATION_STACK_API_URL }}" \
+              -e AVIATION_STACK_API_KEY="${{ secrets.AVIATION_STACK_API_KEY }}" \
+
+              -e SMTP_SERVER="${{ secrets.SMTP_SERVER }}" \
+              -e SMTP_PORT="${{ secrets.SMTP_PORT }}" \
+              -e SMTP_USER="${{ secrets.SMTP_USER }}" \
+              -e SMTP_PASSWORD="${{ secrets.SMTP_PASSWORD }}" \
+              -e NOTIFICATION_EMAIL="${{ secrets.NOTIFICATION_EMAIL }}" \
+
+              -e LOG_LEVEL="${{ secrets.LOG_LEVEL }}" \
+              flight-data-collector
+          EOF
